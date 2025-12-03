@@ -1,0 +1,76 @@
+
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Aditi Sharma",
+      "email": "aditi.sharma@example.com",
+      "role": "student",
+      "enrolledCourses": [1, 3],
+      "progress": {
+        "1": 0.6,
+        "3": 0.3
+      }
+    },
+    {
+      "id": 2,
+      "name": "Rahul Mehta",
+      "email": "rahul.mehta@example.com",
+      "role": "teacher",
+      "authoredCourses": [1]
+    },
+    {
+      "id": 3,
+      "name": "Priya Nair",
+      "email": "priya.nair@example.com",
+      "role": "student",
+      "enrolledCourses": [2],
+      "progress": {
+        "2": 0.8
+      }
+    },
+    {
+      "id": 4,
+      "name": "Ankit Verma",
+      "email": "ankit.verma@example.com",
+      "role": "teacher",
+      "authoredCourses": [2]
+    },
+    {
+      "id": 5,
+      "name": "Sara D’Souza",
+      "email": "sara.dsouza@example.com",
+      "role": "student",
+      "enrolledCourses": [3],
+      "progress": {
+        "3": 0.1
+      }
+    },
+    {
+      "id": 6,
+      "name": "David Lee",
+      "email": "david.lee@example.com",
+      "role": "teacher",
+      "authoredCourses": [3]
+    },
+    {
+      "id": 7,
+      "name": "Isha Kumar",
+      "email": "isha.kumar@example.com",
+      "role": "student",
+      "enrolledCourses": [1, 2],
+      "progress": {
+        "1": 0.4,
+        "2": 0.2
+      }
+    },
+    {
+      "id": 8,
+      "name": "Ravi Patel",
+      "email": "ravi.patel@example.com",
+      "role": "student",
+      "enrolledCourses": [],
+      "progress": {}
+    }
+  ]
+}

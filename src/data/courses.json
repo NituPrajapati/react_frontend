@@ -1,0 +1,536 @@
+
+{
+  "courses": [
+    {
+      "title": "Full Stack Web Development Bootcamp",
+      "subtitle": "Master frontend and backend development",
+      "description": "A complete bootcamp covering HTML, CSS, JavaScript, React, Node.js, databases, and deployment. Build real-world web applications from scratch.",
+      "difficulty": "INTERMEDIATE",
+      "learningObjectives": [
+        "Build responsive websites with HTML and CSS",
+        "Create interactive web applications with JavaScript",
+        "Develop modern frontends with React",
+        "Build RESTful APIs with Node.js and Express",
+        "Work with databases and authentication"
+      ],
+      "coverImageUrl": "https://example.com/images/fullstack-course.jpg",
+      "authorId": 1,
+      "topics": [
+        {
+          "title": "Frontend Fundamentals",
+          "description": "Learn the basics of HTML, CSS, and responsive design",
+          "orderIndex": 1,
+          "subtopics": [
+            {
+              "title": "HTML Semantics",
+              "content": "# HTML Semantics\nUse semantic tags for structure and accessibility.\n\n- **Why it matters:** screen readers, SEO, maintainability.\n- Common tags: `<header>`, `<nav>`, `<main>`, `<section>`, `<article>`, `<footer>`.\n\n> Tip: Start pages with a single `<h1>` and descend in order.\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "CSS Layout: Flexbox",
+              "content": "# Flexbox Essentials\nFlexbox simplifies 1‑D layouts.\n\n- Main axis vs cross axis\n- Useful properties: `display:flex`, `justify-content`, `align-items`, `gap`\n\n```html\n<div class=\"flex justify-between items-center gap-4\">\n  <button>Prev</button>\n  <span>Page 1</span>\n  <button>Next</button>\n</div>\n```\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "Responsive Design",
+              "content": "# Responsive Design\nDesign mobile-first; then scale up with media queries (or Tailwind breakpoints).\n\n- Content-out approach\n- Use relative units: `%`, `rem`, `vh/vw`\n\n> Try: `max-w-prose` and sensible line-length for readability.\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Accessibility Basics",
+              "content": "# A11y Basics\nAccessibility is a core feature, not an afterthought.\n\n- Keyboard focus order, skip links\n- ARIA for *describing*, not fixing bad structure\n\n```html\n<a class=\"sr-only focus:not-sr-only\" href=\"#main\">Skip to content</a>\n```\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "Tailwind Fundamentals",
+              "content": "# Tailwind Fundamentals\nUtility-first CSS for speed and consistency.\n\n- Spacing scale (`p-4`, `m-6`), typography (`prose`), layout (`grid`, `flex`)\n- Extract patterns with `@apply` or components when utilities repeat\n\n```html\n<button class=\"px-4 py-2 rounded-lg shadow hover:shadow-md transition\">\n  Save\n</button>\n```\n",
+              "orderIndex": 5
+            }
+          ]
+        },
+        {
+          "title": "JavaScript Essentials",
+          "description": "Master JavaScript fundamentals and ES6+ features",
+          "orderIndex": 2,
+          "subtopics": [
+            {
+              "title": "Variables & Types",
+              "content": "# Variables & Types\nPrefer `const` by default; use `let` when reassigning.\n\n- Primitives vs objects\n- Avoid implicit globals\n\n```js\nconst count = 3;\nlet total = count + 2;\n```\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "Functions & Scope",
+              "content": "# Functions & Scope\nUnderstand lexical scope and closures.\n\n- Arrow functions capture `this` lexically\n- Pure functions are easier to test\n\n```js\nfunction makeAdder(n){ return x => x + n; }\nconst add5 = makeAdder(5);\n```\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "Async JavaScript",
+              "content": "# Async JavaScript\nPromises and `async/await` help manage async flows.\n\n- Always handle errors (`try/catch`)\n- Use `Promise.all` for parallel work\n\n```js\nconst data = await fetch('/api').then(r => r.json());\n```\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Modules & Bundling",
+              "content": "# Modules & Bundling\nUse ES modules for clarity and tree-shaking.\n\n- `import`/`export` syntax\n- Keep modules single‑purpose\n\n```js\nexport const sum = (a,b) => a + b;\n```\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "Testing Mindset",
+              "content": "# Testing Mindset\nStart small: pure utilities → components → flows.\n\n- Deterministic inputs/outputs\n- Avoid flaky async timing\n\n> Even a couple of well‑chosen tests add big value.\n",
+              "orderIndex": 5
+            }
+          ]
+        },
+        {
+          "title": "React Development",
+          "description": "Build modern web applications with React",
+          "orderIndex": 3,
+          "subtopics": [
+            {
+              "title": "Components & Props",
+              "content": "# Components & Props\nCompose small, focused components.\n\n- Props in, events out\n- Co-locate logic with UI when it clarifies intent\n\n```jsx\nfunction Badge({children}) { return <span className=\"px-2 py-1 rounded\">{children}</span> }\n```\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "State & Effects",
+              "content": "# State & Effects\nKeep state minimal and derived when possible.\n\n- `useState`, `useEffect` basics\n- Cleanup subscriptions in effects\n\n```jsx\nuseEffect(() => { const id = setInterval(tick, 1000); return () => clearInterval(id); }, []);\n```\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "Routing",
+              "content": "# Routing\nClient-side routing enables deep linking.\n\n- Encode course/topic/subtopic in the URL\n- Lazy‑load heavy pages\n\n> Keep routes stable to support bookmarks.\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Markdown Rendering",
+              "content": "# Markdown Rendering\nUse a library like `react-markdown` and safely render content.\n\n- Sanitize if accepting user input\n- Style with `prose` classes\n\n```jsx\n<ReactMarkdown className=\"prose\">{markdown}</ReactMarkdown>\n```\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "State Management Patterns",
+              "content": "# State Management Patterns\nContext is fine for small apps; introduce libraries only when needed.\n\n- Keep derived state out of global stores\n- Persist lightweight state in `localStorage`\n\n```js\nlocalStorage.setItem('progress', JSON.stringify(progress));\n```\n",
+              "orderIndex": 5
+            }
+          ]
+        },
+        {
+          "title": "Backend with Node.js & Express",
+          "description": "Build RESTful APIs and server-side logic",
+          "orderIndex": 4,
+          "subtopics": [
+            {
+              "title": "REST API Design",
+              "content": "# REST API Design\nResource‑oriented endpoints with clear verbs.\n\n- Use nouns (`/courses`, `/topics`)\n- Pagination, filtering, and status codes\n\n```http\nGET /api/courses?page=1&size=20\n```\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "Express Basics",
+              "content": "# Express Basics\nMiddleware chains keep logic modular.\n\n- `app.use` for cross‑cutting concerns\n- Route files per resource\n\n```js\napp.get('/api/health', (_req, res) => res.json({ok:true}));\n```\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "Validation",
+              "content": "# Validation\nValidate inputs at the edge of your system.\n\n- Use schemas (`zod`, `yup`, `joi`)\n- Return helpful error messages\n\n> Bad inputs should fail fast with context.\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Auth Basics",
+              "content": "# Auth Basics\nStart simple: sessions or JWT, not both.\n\n- Store only what you need\n- Refresh tokens securely\n\n```http\nAuthorization: Bearer <token>\n```\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "Error Handling",
+              "content": "# Error Handling\nCentralize error middleware and log meaningfully.\n\n- Distinguish user vs server errors\n- Correlate requests with ids\n\n```js\napp.use((err, _req, res, _next) => res.status(500).json({message: err.message}));\n```\n",
+              "orderIndex": 5
+            }
+          ]
+        },
+        {
+          "title": "Databases & Authentication",
+          "description": "Persist data and manage user identity",
+          "orderIndex": 5,
+          "subtopics": [
+            {
+              "title": "Relational vs NoSQL",
+              "content": "# Relational vs NoSQL\nChoose based on access patterns and consistency needs.\n\n- SQL: joins, transactions, strict schemas\n- NoSQL: flexible schemas, scale‑out\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "SQL Basics",
+              "content": "# SQL Basics\nCRUD with sensible indexes.\n\n```sql\nSELECT id, title FROM courses WHERE difficulty = 'INTERMEDIATE';\n```\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "ORMs",
+              "content": "# ORMs\nUse ORMs to accelerate development; know the generated SQL.\n\n- Migrations for schema changes\n- Beware N+1 queries\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Password Storage",
+              "content": "# Password Storage\nNever store plaintext; use strong hashing and salts.\n\n- Argon2 / bcrypt\n- Rate‑limit login attempts\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "Session Management",
+              "content": "# Session Management\nSecure cookies, CSRF protection, and rotation.\n\n- `SameSite=Lax` or `Strict`\n- HTTPS required in production\n",
+              "orderIndex": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Data Structures & Algorithms with Java",
+      "subtitle": "Master the foundations for technical interviews and beyond",
+      "description": "Hands-on course focusing on core data structures, algorithmic paradigms, and complexity analysis in Java.",
+      "difficulty": "INTERMEDIATE",
+      "learningObjectives": [
+        "Analyze time and space complexity",
+        "Implement classical data structures in Java",
+        "Apply greedy, divide-and-conquer, and dynamic programming",
+        "Solve problems under constraints",
+        "Write clean, testable algorithmic code"
+      ],
+      "coverImageUrl": "https://example.com/images/dsa-java.jpg",
+      "authorId": 2,
+      "topics": [
+        {
+          "title": "Arrays & Strings",
+          "description": "Essential building blocks and patterns",
+          "orderIndex": 1,
+          "subtopics": [
+            {
+              "title": "Two-Pointer Technique",
+              "content": "# Two-Pointer Technique\nSolve many array/string problems in linear time.\n\n- Opposite ends for sorted arrays\n- Slow/fast pointers for detection (e.g., cycles)\n\n```java\nint i=0,j=n-1; while(i<j){ /* move i/j based on condition */ }\n```\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "Sliding Window",
+              "content": "# Sliding Window\nMaintain a dynamic window for substrings/subarrays.\n\n- Fixed vs variable window size\n- Track counts in a map\n\n```java\nwhile(r<n){ /* expand r */ while(invalid){ /* shrink l */ } }\n```\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "Prefix Sums",
+              "content": "# Prefix Sums\nPrecompute cumulative sums to answer range queries quickly.\n\n- `pref[i] = pref[i-1] + a[i]`\n- Extend to 2D grids\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "String Hashing",
+              "content": "# String Hashing\nRolling hash for substring search (Rabin–Karp).\n\n- Avoid collisions with mod + base\n- Double hashing for safety\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "Frequency Maps",
+              "content": "# Frequency Maps\nCount occurrences using `HashMap`.\n\n```java\nMap<Character,Integer> cnt = new HashMap<>();\nfor(char c: s.toCharArray()) cnt.merge(c,1,Integer::sum);\n```\n",
+              "orderIndex": 5
+            }
+          ]
+        },
+        {
+          "title": "Linked Lists, Stacks & Queues",
+          "description": "Core linear data structures",
+          "orderIndex": 2,
+          "subtopics": [
+            {
+              "title": "Singly vs Doubly Linked Lists",
+              "content": "# Linked List Variants\nChoose based on operations and traversal needs.\n\n- Singly: lighter, forward only\n- Doubly: back pointers ease deletion\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "Cycle Detection",
+              "content": "# Cycle Detection\nFloyd’s tortoise-hare detects cycles in O(n).\n\n```java\nListNode s=head,f=head; while(f!=null&&f.next!=null){ s=s.next; f=f.next.next; if(s==f) break; }\n```\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "Stack Applications",
+              "content": "# Stack Applications\nParse expressions, validate parentheses, evaluate RPN.\n\n- Monotonic stacks for next greater element\n- DFS recursion simulation\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Queue & Deque Patterns",
+              "content": "# Queue & Deque\nUse queues for BFS and deques for sliding window maxima.\n\n```java\nDeque<Integer> dq = new ArrayDeque<>();\n```\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "LRU Cache",
+              "content": "# LRU Cache\nCombine HashMap + Doubly Linked List for O(1) ops.\n\n- Evict least‑recently used on capacity\n- Move accessed node to head\n",
+              "orderIndex": 5
+            }
+          ]
+        },
+        {
+          "title": "Trees & Graphs",
+          "description": "Hierarchical and networked structures",
+          "orderIndex": 3,
+          "subtopics": [
+            {
+              "title": "Tree Traversals",
+              "content": "# Tree Traversals\nDFS variants: preorder, inorder, postorder. BFS by levels.\n\n- Iterative with stacks/queues\n- Morris traversal for O(1) space inorder\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "Binary Search Trees",
+              "content": "# BSTs\nMaintain order with O(log n) avg operations.\n\n- Inorder yields sorted order\n- Self‑balancing trees avoid skew\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "Graph Representations",
+              "content": "# Graph Representations\nChoose adjacency list for sparse graphs.\n\n- Directed vs undirected\n- Weighted edges\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Shortest Paths",
+              "content": "# Shortest Paths\nDijkstra for non-negative weights; BFS for unweighted.\n\n```java\n// Use priority queue for Dijkstra\n```\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "Topological Sort",
+              "content": "# Topological Sort\nOrder DAG nodes so edges go forward.\n\n- Kahn’s algorithm (in-degree)\n- DFS finishing times\n",
+              "orderIndex": 5
+            }
+          ]
+        },
+        {
+          "title": "Sorting & Searching",
+          "description": "Classic algorithms and performance tradeoffs",
+          "orderIndex": 4,
+          "subtopics": [
+            {
+              "title": "Binary Search Patterns",
+              "content": "# Binary Search Patterns\nSearch on answer space; beware mid overflow.\n\n```java\nint mid = lo + (hi - lo) / 2;\n```\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "Quicksort & Partitioning",
+              "content": "# Quicksort\nAverage O(n log n); choose good pivots and tail‑recursion optimize.\n\n- Lomuto vs Hoare partitions\n- Randomized pivots reduce worst cases\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "Mergesort & Stability",
+              "content": "# Mergesort\nStable, predictable O(n log n) with extra memory.\n\n- Ideal for linked lists\n- External sorting for large data\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Heaps & HeapSort",
+              "content": "# Heaps & HeapSort\nBinary heap supports O(log n) push/pop.\n\n- Use for priority scheduling\n- k‑largest elements via min‑heap\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "Order Statistics",
+              "content": "# Order Statistics\nQuickselect finds kth element in average linear time.\n\n- Median of medians for worst‑case guarantees\n",
+              "orderIndex": 5
+            }
+          ]
+        },
+        {
+          "title": "Dynamic Programming",
+          "description": "Optimization via overlapping subproblems",
+          "orderIndex": 5,
+          "subtopics": [
+            {
+              "title": "Memoization vs Tabulation",
+              "content": "# Memoization vs Tabulation\nTop‑down recursion with cache vs bottom‑up loops.\n\n- Identify state and transitions\n- Base cases first\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "Knapsack Variants",
+              "content": "# Knapsack\n0/1 vs unbounded; watch dimensions and memory optimizations.\n\n```java\nfor(int w=W; w>=wt[i]; --w) dp[w] = Math.max(dp[w], dp[w-wt[i]]+val[i]);\n```\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "Sequence DP",
+              "content": "# Sequence DP\nLIS, Edit Distance, LCS—classic patterns.\n\n- Reconstruct solutions with parent pointers\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Grid DP",
+              "content": "# Grid DP\nPaths, obstacles, and combinatorics.\n\n- Use modulo to avoid overflow\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "Digit DP (Intro)",
+              "content": "# Digit DP\nCount numbers with constraints by iterating digits.\n\n- State often: index, tight, sum/mask\n",
+              "orderIndex": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Machine Learning Fundamentals with Python",
+      "subtitle": "From data wrangling to first models",
+      "description": "Practical introduction to ML concepts, supervised learning, evaluation, and lightweight deployment using Python.",
+      "difficulty": "BEGINNER",
+      "learningObjectives": [
+        "Manipulate data with NumPy and pandas",
+        "Build and evaluate supervised models",
+        "Avoid common pitfalls like leakage and overfitting",
+        "Tune models with validation and cross‑validation",
+        "Package and ship simple models"
+      ],
+      "coverImageUrl": "https://example.com/images/ml-fundamentals.jpg",
+      "authorId": 3,
+      "topics": [
+        {
+          "title": "Python & NumPy Basics",
+          "description": "Numerical computing foundations",
+          "orderIndex": 1,
+          "subtopics": [
+            {
+              "title": "Vectors & Matrices",
+              "content": "# Vectors & Matrices\nUse NumPy arrays for efficient numerical ops.\n\n```python\nimport numpy as np\nA = np.array([[1,2],[3,4]])\nv = np.array([5,6])\nA @ v\n```\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "Broadcasting",
+              "content": "# Broadcasting\nAlign shapes automatically for elementwise ops.\n\n- Add scalar to vector/matrix\n- Expand dims with `None`/`np.newaxis`\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "Randomness & Seeding",
+              "content": "# Randomness & Seeding\nReproducibility matters.\n\n```python\nrng = np.random.default_rng(42)\nrng.normal(size=3)\n```\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Vectorization",
+              "content": "# Vectorization\nPrefer array ops over Python loops for speed.\n\n- Use `np.where` and ufuncs\n- Avoid `for` when possible\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "Saving & Loading",
+              "content": "# Saving & Loading\nStore arrays efficiently.\n\n```python\nnp.save('x.npy', x); x2 = np.load('x.npy')\n```\n",
+              "orderIndex": 5
+            }
+          ]
+        },
+        {
+          "title": "Data Wrangling with pandas",
+          "description": "Cleaning, joining, and feature extraction",
+          "orderIndex": 2,
+          "subtopics": [
+            {
+              "title": "Reading Data",
+              "content": "# Reading Data\nCSV, Parquet, SQL—choose the right format.\n\n```python\nimport pandas as pd\ndf = pd.read_csv('data.csv')\n```\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "Missing Values",
+              "content": "# Missing Values\nImpute or drop based on impact.\n\n- Mean/median for numeric\n- Most frequent or special token for categoricals\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "Feature Engineering",
+              "content": "# Feature Engineering\nExtract signal: ratios, interactions, buckets.\n\n- One‑hot encoding for categoricals\n- Scale numeric with StandardScaler\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Train/Validation Split",
+              "content": "# Train/Validation Split\nPrevent leakage; split before peeking.\n\n```python\nfrom sklearn.model_selection import train_test_split\nXtr, Xva, ytr, yva = train_test_split(X, y, test_size=0.2, random_state=42)\n```\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "Pipelines",
+              "content": "# Pipelines\nBundle preprocessing + model to avoid leakage.\n\n```python\nfrom sklearn.pipeline import make_pipeline\npipe = make_pipeline(StandardScaler(), LogisticRegression())\n```\n",
+              "orderIndex": 5
+            }
+          ]
+        },
+        {
+          "title": "Supervised Learning",
+          "description": "Core algorithms and intuition",
+          "orderIndex": 3,
+          "subtopics": [
+            {
+              "title": "Linear Models",
+              "content": "# Linear Models\nBaselines that punch above their weight.\n\n- Ridge/Lasso for regularization\n- Interpret coefficients carefully\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "Tree-Based Methods",
+              "content": "# Trees & Ensembles\nDecision Trees, Random Forests, Gradient Boosting.\n\n- Handle nonlinearity & interactions\n- Beware overfitting small leaves\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "k-NN & SVM (Intro)",
+              "content": "# k-NN & SVM (Intro)\nInstance-based vs margin-based learning.\n\n- Scale features for distance‑based methods\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Class Imbalance",
+              "content": "# Class Imbalance\nAdjust thresholds, resample, or use class weights.\n\n- Evaluate with PR curves\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "Cross-Validation",
+              "content": "# Cross-Validation\nEstimate generalization reliably.\n\n```python\nfrom sklearn.model_selection import cross_val_score\nscores = cross_val_score(model, X, y, cv=5)\n```\n",
+              "orderIndex": 5
+            }
+          ]
+        },
+        {
+          "title": "Model Evaluation & Tuning",
+          "description": "Metrics, validation schemes, and hyperparameters",
+          "orderIndex": 4,
+          "subtopics": [
+            {
+              "title": "Metrics 101",
+              "content": "# Metrics 101\nChoose metrics that reflect business needs.\n\n- Regression: MSE/MAE/R2\n- Classification: accuracy, F1, ROC‑AUC, PR‑AUC\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "Hyperparameter Search",
+              "content": "# Hyperparameter Search\nStart with coarse grids; move to randomized or Bayesian search.\n\n- Keep a validation set untouched\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "Feature Importance",
+              "content": "# Feature Importance\nUse permutation importance; beware leakage.\n\n- SHAP for local/global explanations\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Overfitting & Regularization",
+              "content": "# Overfitting & Regularization\nBias‑variance tradeoff in practice.\n\n- Early stopping for boosting\n- Add noise and simplify models\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "Reproducibility",
+              "content": "# Reproducibility\nFix seeds, pin versions, log configs & metrics.\n\n```bash\npip freeze > requirements.txt\n```\n",
+              "orderIndex": 5
+            }
+          ]
+        },
+        {
+          "title": "Deployment & MLOps (Lite)",
+          "description": "Package, serve, and monitor simple models",
+          "orderIndex": 5,
+          "subtopics": [
+            {
+              "title": "Model Packaging",
+              "content": "# Model Packaging\nSerialize models with joblib or pickle + version artifacts.\n\n```python\nimport joblib; joblib.dump(model, 'model.joblib')\n```\n",
+              "orderIndex": 1
+            },
+            {
+              "title": "Simple Serving",
+              "content": "# Simple Serving\nExpose predictions via a lightweight API.\n\n- FastAPI/Flask for prototypes\n- Validate inputs at the boundary\n",
+              "orderIndex": 2
+            },
+            {
+              "title": "Monitoring Basics",
+              "content": "# Monitoring Basics\nTrack latency, errors, and data drift.\n\n- Set alerts on key metrics\n",
+              "orderIndex": 3
+            },
+            {
+              "title": "Data Versioning",
+              "content": "# Data Versioning\nKeep datasets and features traceable.\n\n- Hash files; store schemas\n",
+              "orderIndex": 4
+            },
+            {
+              "title": "Ethics & Privacy",
+              "content": "# Ethics & Privacy\nRespect user consent, minimize PII, and audit models.\n\n- Document limitations and intended use\n",
+              "orderIndex": 5
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
