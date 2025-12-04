@@ -18,7 +18,7 @@ const ThemeToggle = ({ theme, onToggle }) => (
   >
     <span className="text-sm font-medium">{theme === 'dark' ? 'Dark' : 'Light'} mode</span>
     <svg
-      className="w-4 h-4 text-[var(--accent)]"
+      className="w-4 h-4 text-(--accent)"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
