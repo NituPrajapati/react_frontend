@@ -49,7 +49,7 @@ function MainContent({ courses }) {
   // Determine what content to display
   const displayContent = useMemo(() => {
     if (selectedSubtopicData?.content) {
-      return { type: 'subtopic', content: selectedSubtopicData.content, title: selectedSubtopicData.title };
+      return { type: 'subtopic', content: selectedSubtopicData.content };
     }
     if (selectedTopicData?.description) {
       return { type: 'topic', content: selectedTopicData.description, title: selectedTopicData.title };

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useSelected } from '../contexts/SelectedContext';
 
 const highlightClasses =
@@ -18,8 +18,44 @@ function Sidebar({ courses, searchQuery }) {
 
   const [expandedTopics, setExpandedTopics] = useState({});
   const [expandedSubtopics, setExpandedSubtopics] = useState({});
+  const courseRefs = useRef([]);
+  const topicRefs = useRef([]);
+  const subtopicRefs = useRef([]);
+
+  courseRefs.current = [];
+  topicRefs.current = [];
+  subtopicRefs.current = [];
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
+
+  // Reset expansion states when course changes
+  useEffect(() => {
+    setExpandedTopics({});
+    setExpandedSubtopics({});
+  }, [selectedCourse]);
+
+  // Auto-expand topics that contain matching subtopics when searching
+  useEffect(() => {
+    if (!selectedCourse || !normalizedQuery) return;
+    const courseData = courses.find((c) => c.title === selectedCourse);
+    if (!courseData) return;
+
+    const topicsWithMatches = courseData.topics?.reduce((acc, topic) => {
+      const hasMatchingSubtopic = topic.subtopics?.some((subtopic) => {
+        const titleMatch = subtopic.title.toLowerCase().includes(normalizedQuery);
+        const contentMatch = subtopic.content?.toLowerCase().includes(normalizedQuery);
+        return titleMatch || contentMatch;
+      });
+      if (hasMatchingSubtopic) {
+        acc[topic.title] = true;
+      }
+      return acc;
+    }, {});
+
+    if (topicsWithMatches && Object.keys(topicsWithMatches).length > 0) {
+      setExpandedTopics((prev) => ({ ...prev, ...topicsWithMatches }));
+    }
+  }, [courses, normalizedQuery, selectedCourse]);
 
   const filteredCourses = useMemo(() => {
     if (!normalizedQuery) return courses;
@@ -48,6 +84,43 @@ function Sidebar({ courses, searchQuery }) {
     });
   }, [courses, normalizedQuery]);
 
+  const focusButton = (refs, index) => {
+    const target = refs.current[index];
+    if (target) {
+      target.focus();
+    }
+  };
+
+  const handleCourseKeyDown = (event, index) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      focusButton(courseRefs, Math.min(courseRefs.current.length - 1, index + 1));
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      focusButton(courseRefs, Math.max(0, index - 1));
+    }
+  };
+
+  const handleTopicKeyDown = (event, index) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      focusButton(topicRefs, Math.min(topicRefs.current.length - 1, index + 1));
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      focusButton(topicRefs, Math.max(0, index - 1));
+    }
+  };
+
+  const handleSubtopicKeyDown = (event, index) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      focusButton(subtopicRefs, Math.min(subtopicRefs.current.length - 1, index + 1));
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      focusButton(subtopicRefs, Math.max(0, index - 1));
+    }
+  };
+
   const handleCourseSelect = (course) => {
     selectCourse(course.title);
   };
@@ -70,25 +143,34 @@ function Sidebar({ courses, searchQuery }) {
   };
 
   return (
-    <aside className="w-80 bg-[var(--surface-elevated)] text-[var(--text-primary)] h-full border-r border-[var(--border-color)] flex flex-col">
-      <div className="flex-1 overflow-y-auto px-4 py-6 sidebar-scroll">
-        <div className="space-y-2">
+    <aside className="w-80 bg-[var(--surface-elevated)] text-[var(--text-primary)] h-full border-r border-[var(--border-color)] flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-y-auto px-4 py-6 sidebar-scroll" role="navigation" aria-label="Course navigation">
+        <div className="space-y-2" role="tree" aria-label="Courses">
           {filteredCourses.length === 0 ? (
             <p className="text-sm text-[var(--text-secondary)]">No matches found</p>
           ) : (
-            filteredCourses.map((course) => {
+            filteredCourses.map((course, courseIndex) => {
               const isSelected = selectedCourse === course.title;
               const selectedCourseData = isSelected ? courses.find((c) => c.title === course.title) : null;
+              const normalizedId = course.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
               return (
-                <div key={course.title} className="space-y-2">
+                <div key={course.title} className="space-y-2" role="treeitem" aria-expanded={isSelected} aria-selected={isSelected}>
                   <button
+                    ref={(el) => {
+                      courseRefs.current[courseIndex] = el;
+                    }}
                     onClick={() => handleCourseSelect(course)}
+                    onKeyDown={(event) => handleCourseKeyDown(event, courseIndex)}
                     className={`${baseButtonClasses} ${
                       isSelected
                         ? highlightClasses
                         : 'bg-[var(--surface-muted)]/60 text-[var(--text-primary)] hover:border-[var(--accent)]'
                     }`}
+                    role="button"
+                    aria-pressed={isSelected}
+                    aria-controls={`course-${normalizedId}-topics`}
+                    aria-label={`Course ${course.title}`}
                   >
                     <div className="font-medium">{course.title}</div>
                     {course.subtitle && (
@@ -100,20 +182,34 @@ function Sidebar({ courses, searchQuery }) {
 
                   {/* Nested topics and subtopics under selected course */}
                   {isSelected && selectedCourseData && (
-                    <div className="ml-4 space-y-2 border-l-2 border-[var(--border-color)] pl-4">
-                      {selectedCourseData.topics?.map((topic) => {
+                    <div
+                      className="ml-4 space-y-2 border-l-2 border-[var(--border-color)] pl-4"
+                      id={`course-${normalizedId}-topics`}
+                      role="group"
+                      aria-label={`${course.title} topics`}
+                    >
+                      {selectedCourseData.topics?.map((topic, topicIndex) => {
                         const topicExpanded = expandedTopics[topic.title] ?? selectedTopic === topic.title;
+                        const topicId = `${normalizedId}-topic-${topic.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
                         return (
-                          <div key={topic.title} className="space-y-2">
+                          <div key={topic.title} className="space-y-2" role="treeitem" aria-expanded={topicExpanded} aria-selected={selectedTopic === topic.title}>
                             <div className="flex items-center gap-2">
                               <button
+                                ref={(el) => {
+                                  topicRefs.current[topicIndex] = el;
+                                }}
                                 onClick={() => handleTopicClick(topic)}
+                                onKeyDown={(event) => handleTopicKeyDown(event, topicIndex)}
                                 className={`flex-1 text-left text-sm p-2 rounded transition-colors ${
                                   selectedTopic === topic.title
                                     ? 'text-[var(--accent)] font-semibold bg-[var(--surface-muted)]/40'
                                     : 'text-[var(--text-primary)] hover:text-[var(--accent)]'
                                 }`}
+                                role="button"
+                                aria-pressed={selectedTopic === topic.title}
+                                aria-controls={`${topicId}-subtopics`}
+                                aria-label={`Topic ${topic.title}`}
                               >
                                 {topic.title}
                               </button>
@@ -143,22 +239,34 @@ function Sidebar({ courses, searchQuery }) {
 
                             {/* Nested subtopics under expanded topic */}
                             {topicExpanded && topic.subtopics && topic.subtopics.length > 0 && (
-                              <div className="ml-4 space-y-1 border-l-2 border-dashed border-[var(--border-color)] pl-4">
-                                {topic.subtopics.map((subtopic) => (
-                                  <button
-                                    key={subtopic.title}
-                                    onClick={() => handleSubtopicClick(subtopic)}
-                                    className={`w-full text-left text-xs p-1.5 rounded transition-colors ${
-                                      selectedSubtopic === subtopic.title
-                                        ? 'text-[var(--accent)] font-semibold bg-[var(--surface-muted)]/40'
-                                        : 'text-[var(--text-secondary)] hover:text-[var(--accent)]'
-                                    }`}
-                                  >
-                                    {subtopic.title}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
+                                <div
+                                  className="ml-4 space-y-1 border-l-2 border-dashed border-[var(--border-color)] pl-4"
+                                  id={`${topicId}-subtopics`}
+                                  role="group"
+                                  aria-label={`${topic.title} subtopics`}
+                                >
+                                  {topic.subtopics.map((subtopic, subtopicIndex) => (
+                                    <button
+                                      key={subtopic.title}
+                                      ref={(el) => {
+                                        subtopicRefs.current[subtopicIndex] = el;
+                                      }}
+                                      onClick={() => handleSubtopicClick(subtopic)}
+                                      onKeyDown={(event) => handleSubtopicKeyDown(event, subtopicIndex)}
+                                      className={`w-full text-left text-xs p-1.5 rounded transition-colors ${
+                                        selectedSubtopic === subtopic.title
+                                          ? 'text-[var(--accent)] font-semibold bg-[var(--surface-muted)]/40'
+                                          : 'text-[var(--text-secondary)] hover:text-[var(--accent)]'
+                                      }`}
+                                      role="treeitem"
+                                      aria-selected={selectedSubtopic === subtopic.title}
+                                      aria-label={`Subtopic ${subtopic.title}`}
+                                    >
+                                      {subtopic.title}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
                           </div>
                         );
                       })}
