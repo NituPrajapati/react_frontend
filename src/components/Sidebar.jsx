@@ -432,7 +432,7 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
                                   aria-level="2"
                                 >
                                   {normalizedQuery ? highlightText(topic.title, searchQuery) : topic.title}
-                                  <span className="text-xs text-[var(--text-secondary)]">{topicProgress}%</span>
+                                 {/*<span className="text-xs text-[var(--text-secondary)]">{topicProgress}%</span>*/}
                                 </button>
                                 {filteredSubtopics.length > 0 && (
                                   <button
