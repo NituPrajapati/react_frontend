@@ -197,9 +197,53 @@ mark {
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
   font-weight: 600;
+  opacity: 1 !important;
 }
 
 [data-theme='dark'] mark {
   background-color: #7883a933;
   color: #08A696;
+  opacity: 1 !important;
+}
+
+/* Progress bar styles */
+.progress-bar {
+  transition: width 0.3s ease-out;
+}
+
+/* Checkbox styles - circular */
+input[type="checkbox"] {
+  accent-color: var(--accent);
+  border-radius: 50% !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 2px solid var(--border-color);
+  background-color: transparent;
+  position: relative;
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+input[type="checkbox"]:checked::before {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+/* Completed subtopic styles */
+.completed-subtopic {
+  text-decoration: line-through;
+  opacity: 0.6;
+  color: var(--text-secondary);
 }

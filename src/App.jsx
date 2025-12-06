@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { SelectedProvider } from './contexts/SelectedContext';
+import { ProgressProvider } from './contexts/ProgressContext';
 import Sidebar from './components/Sidebar';
 import SearchBar from './components/SearchBar';
 import MainContent from './components/MainContent';
@@ -206,18 +207,20 @@ function App() {
   return (
     <Router>
       <SelectedProvider>
-        <div className="min-h-screen bg-[var(--surface-page)] transition-colors duration-300 flex flex-col">
-          <a href="#main-content" className="skip-to-content">
-            Skip to main content
-          </a>
-          <Navigation theme={theme} onToggleTheme={toggleTheme} />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/admin" element={<Admin />} />
-            </Routes>
+        <ProgressProvider>
+          <div className="min-h-screen bg-[var(--surface-page)] transition-colors duration-300 flex flex-col">
+            <a href="#main-content" className="skip-to-content">
+              Skip to main content
+            </a>
+            <Navigation theme={theme} onToggleTheme={toggleTheme} />
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/admin" element={<Admin />} />
+              </Routes>
+            </div>
           </div>
-        </div>
+        </ProgressProvider>
       </SelectedProvider>
     </Router>
   );

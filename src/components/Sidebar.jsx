@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { useSelected } from '../contexts/SelectedContext';
+import { useProgress } from '../contexts/ProgressContext';
 import { highlightText, hasMatch, topicHasMatch, subtopicHasMatch } from '../utils/searchHelpers';
 
 const highlightClasses =
@@ -16,6 +17,13 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
     selectTopic,
     selectSubtopic,
   } = useSelected();
+
+  const {
+    toggleSubtopic,
+    isSubtopicCompleted,
+    getCourseProgress,
+    getSingleTopicProgress,
+  } = useProgress();
 
   const [expandedTopics, setExpandedTopics] = useState({});
   const [expandedCourses, setExpandedCourses] = useState({});
@@ -48,6 +56,20 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
       setExpandedCourses({});
     }
   }, [selectedCourse, normalizedQuery]);
+
+  // Ensure selected topic is expanded when topic changes (when not searching)
+  // Only expand if not already manually toggled
+  useEffect(() => {
+    if (!normalizedQuery && selectedCourse && selectedTopic) {
+      setExpandedTopics((prev) => ({
+        ...prev,
+        [selectedCourse]: {
+          ...prev[selectedCourse],
+          [selectedTopic]: true,
+        },
+      }));
+    }
+  }, [selectedCourse, selectedTopic, normalizedQuery]);
 
   // Auto-expand courses and topics that contain matches when searching
   useEffect(() => {
@@ -194,16 +216,35 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
   };
 
   const handleCourseSelect = (course) => {
-    selectCourse(course.title);
-    // Auto-expand if searching
-    if (normalizedQuery && expandedCourses[course.title]) {
-      // Already expanded by search logic
-    } else if (!normalizedQuery) {
-      // Normal behavior: expand on selection
-      setExpandedCourses((prev) => ({ ...prev, [course.title]: true }));
+    const isCurrentlyExpanded = isCourseExpanded(course.title);
+    
+    // Toggle course expansion - if expanded, collapse; if collapsed, expand
+    if (!normalizedQuery) {
+      // Normal behavior: toggle expansion
+      if (isCurrentlyExpanded) {
+        // Collapse course
+        setExpandedCourses((prev) => {
+          const newState = { ...prev };
+          delete newState[course.title];
+          return newState;
+        });
+        selectCourse(null);
+      } else {
+        // Expand course
+        setExpandedCourses((prev) => ({ ...prev, [course.title]: true }));
+        selectCourse(course.title);
+      }
+    } else {
+      // When searching, just select the course
+      if (!isCurrentlyExpanded) {
+        selectCourse(course.title);
+      } else {
+        selectCourse(null);
+      }
     }
+    
     // Close sidebar on mobile when course is selected
-    if (onClose && isMobile) {
+    if (onClose && isMobile && !isCurrentlyExpanded) {
       onClose();
     }
   };
@@ -229,34 +270,30 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
   };
 
   const handleTopicClick = (topic) => {
-    selectTopic(topic.title);
-    // Auto-expand if searching
-    if (normalizedQuery) {
-      const currentCourse = selectedCourse;
-      if (currentCourse) {
-        setExpandedTopics((prev) => ({
-          ...prev,
-          [currentCourse]: {
-            ...prev[currentCourse],
-            [topic.title]: true,
-          },
-        }));
-      }
+    const currentCourse = selectedCourse;
+    if (!currentCourse) return;
+    
+    // Toggle topic expansion - if expanded, collapse; if collapsed, expand
+    const isCurrentlyExpanded = isTopicExpanded(currentCourse, topic.title);
+    
+    setExpandedTopics((prev) => ({
+      ...prev,
+      [currentCourse]: {
+        ...prev[currentCourse],
+        [topic.title]: !isCurrentlyExpanded,
+      },
+    }));
+    
+    // Only select topic if it's being expanded (not collapsed)
+    if (!isCurrentlyExpanded) {
+      selectTopic(topic.title);
     } else {
-      // Normal behavior
-      const currentCourse = selectedCourse;
-      if (currentCourse) {
-        setExpandedTopics((prev) => ({
-          ...prev,
-          [currentCourse]: {
-            ...prev[currentCourse],
-            [topic.title]: true,
-          },
-        }));
-      }
+      // If collapsing, clear topic selection
+      selectTopic(null);
     }
+    
     // Close sidebar on mobile when topic is selected
-    if (onClose && isMobile) {
+    if (onClose && isMobile && !isCurrentlyExpanded) {
       onClose();
     }
   };
@@ -278,17 +315,20 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
   };
 
   // Determine if topic should be expanded
+  // Only expand the currently selected topic (or topics expanded by search)
   const isTopicExpanded = (courseTitle, topicTitle) => {
+    // If searching, use expanded state from search logic
     if (normalizedQuery) {
-      return expandedTopics[courseTitle]?.[topicTitle] ?? selectedTopic === topicTitle;
+      return expandedTopics[courseTitle]?.[topicTitle] ?? false;
     }
-    return expandedTopics[courseTitle]?.[topicTitle] ?? selectedTopic === topicTitle;
+    // When not searching, only expand the selected topic
+    return selectedTopic === topicTitle;
   };
 
   return (
     <aside
       id="course-sidebar"
-      className={`fixed md:static inset-y-0 left-0 w-80 bg-[var(--surface-elevated)] text-[var(--text-primary)] h-full border-b md:border-b-0 md:border-r border-[var(--border-color)] flex flex-col overflow-hidden max-w-full min-h-0 z-50 md:z-auto transition-transform duration-300 ease-in-out ${
+      className={`fixed md:static inset-y-0 left-0 w-80 bg-[var(--surface-elevated)] text-[var(--text-primary)] h-full border-b lg:border-b-0 md:border-r border-[var(--border-color)] flex flex-col overflow-y:scroll max-w-full min-h-0 z-50 md:z-auto transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       }`}
       aria-label="Course navigation"
@@ -306,36 +346,51 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
               const isExpanded = isCourseExpanded(course.title);
               const normalizedId = course.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
               const filteredTopics = getFilteredTopics(course.topics);
+              const courseProgress = getCourseProgress(course);
 
               return (
                 <div key={course.title} className="space-y-2">
-                  <button
-                    ref={(el) => {
-                      courseRefs.current[courseIndex] = el;
-                    }}
-                    onClick={() => handleCourseSelect(course)}
-                    onKeyDown={(event) => handleCourseKeyDown(event, courseIndex, course)}
-                    className={`${baseButtonClasses} ${
-                      isSelected
-                        ? highlightClasses
-                        : 'bg-[var(--surface-muted)]/60 text-[var(--text-primary)] hover:border-[var(--accent)]'
-                    } focus-visible:outline-2 focus-visible:outline-[var(--accent)] focus-visible:outline-offset-2`}
-                    role="treeitem"
-                    aria-pressed={isSelected}
-                    aria-expanded={isExpanded}
-                    aria-controls={isExpanded ? `course-${normalizedId}-topics` : undefined}
-                    aria-label={`Course: ${course.title}${course.subtitle ? `, ${course.subtitle}` : ''}`}
-                    aria-level="1"
-                  >
-                    <div className="font-medium">
-                      {normalizedQuery ? highlightText(course.title, searchQuery) : course.title}
-                    </div>
-                    {course.subtitle && (
-                      <div className="text-xs text-[var(--text-secondary)] mt-1 opacity-80">
-                        {normalizedQuery ? highlightText(course.subtitle, searchQuery) : course.subtitle}
+                  <div className="space-y-1">
+                    <button
+                      ref={(el) => {
+                        courseRefs.current[courseIndex] = el;
+                      }}
+                      onClick={() => handleCourseSelect(course)}
+                      onKeyDown={(event) => handleCourseKeyDown(event, courseIndex, course)}
+                      className={`${baseButtonClasses} ${
+                        isSelected
+                          ? highlightClasses
+                          : 'bg-[var(--surface-muted)]/60 text-[var(--text-primary)] hover:border-[var(--accent)]'
+                      } focus-visible:outline-2 focus-visible:outline-[var(--accent)] focus-visible:outline-offset-2`}
+                      role="treeitem"
+                      aria-pressed={isSelected}
+                      aria-expanded={isExpanded}
+                      aria-controls={isExpanded ? `course-${normalizedId}-topics` : undefined}
+                      aria-label={`Course: ${course.title}${course.subtitle ? `, ${course.subtitle}` : ''}`}
+                      aria-level="1"
+                    >
+                      <div className="font-medium">
+                        {normalizedQuery ? highlightText(course.title, searchQuery) : course.title}
                       </div>
-                    )}
-                  </button>
+                      {course.subtitle && (
+                        <div className="text-xs text-[var(--text-secondary)] mt-1">
+                          {normalizedQuery ? highlightText(course.subtitle, searchQuery) : course.subtitle}
+                        </div>
+                      )}
+                    </button>
+                    {/* Course Progress Bar */}
+                    <div className="w-full bg-[var(--surface-muted)]/40 rounded-full h-1.5 overflow-hidden">
+                      <div
+                        className="h-full bg-[var(--accent)] transition-all duration-300 ease-out"
+                        style={{ width: `${courseProgress}%` }}
+                        role="progressbar"
+                        aria-valuenow={courseProgress}
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-label={`Course progress: ${courseProgress}%`}
+                      />
+                    </div>
+                  </div>
 
                   {/* Nested topics and subtopics under expanded course */}
                   {isExpanded && filteredTopics.length > 0 && (
@@ -350,56 +405,71 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
                         const topicExpanded = isTopicExpanded(course.title, topic.title);
                         const topicId = `${normalizedId}-topic-${topic.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
                         const filteredSubtopics = getFilteredSubtopics(topic.subtopics);
+                        const topicProgress = getSingleTopicProgress(topic);
 
                         return (
                           <div key={topic.title} className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <button
-                                ref={(el) => {
-                                  topicRefs.current[topicIndex] = el;
-                                }}
-                                onClick={() => handleTopicClick(topic)}
-                                onKeyDown={(event) => handleTopicKeyDown(event, topicIndex, topic)}
-                                className={`flex-1 text-left text-sm p-2 rounded transition-colors focus-visible:outline-2 focus-visible:outline-[var(--accent)] focus-visible:outline-offset-2 ${
-                                  selectedTopic === topic.title
-                                    ? 'text-[var(--accent)] font-semibold bg-[var(--surface-muted)]/40'
-                                    : 'text-[var(--text-primary)] hover:text-[var(--accent)]'
-                                }`}
-                                role="treeitem"
-                                aria-pressed={selectedTopic === topic.title}
-                                aria-expanded={topicExpanded}
-                                aria-controls={filteredSubtopics.length > 0 ? `${topicId}-subtopics` : undefined}
-                                aria-label={`Topic: ${topic.title}`}
-                                aria-level="2"
-                              >
-                                {normalizedQuery ? highlightText(topic.title, searchQuery) : topic.title}
-                              </button>
-                              {filteredSubtopics.length > 0 && (
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
                                 <button
-                                  type="button"
-                                  onClick={(e) => toggleTopic(course.title, topic.title, e)}
-                                  onKeyDown={(e) => handleExpandKeyDown(e, course.title, topic.title)}
-                                  className="text-[var(--text-secondary)] hover:text-[var(--accent)] p-1 focus-visible:outline-2 focus-visible:outline-[var(--accent)] focus-visible:outline-offset-2 rounded"
-                                  aria-label={topicExpanded ? `Collapse ${topic.title} subtopics` : `Expand ${topic.title} subtopics`}
+                                  ref={(el) => {
+                                    topicRefs.current[topicIndex] = el;
+                                  }}
+                                  onClick={() => handleTopicClick(topic)}
+                                  onKeyDown={(event) => handleTopicKeyDown(event, topicIndex, topic)}
+                                  className={`flex-1 text-left text-sm p-2 rounded transition-colors focus-visible:outline-2 focus-visible:outline-[var(--accent)] focus-visible:outline-offset-2 ${
+                                    selectedTopic === topic.title
+                                      ? 'text-[var(--accent)] font-semibold bg-[var(--surface-muted)]/40'
+                                      : 'text-[var(--text-primary)] hover:text-[var(--accent)]'
+                                  }`}
+                                  role="treeitem"
+                                  aria-pressed={selectedTopic === topic.title}
                                   aria-expanded={topicExpanded}
-                                  aria-controls={`${topicId}-subtopics`}
+                                  aria-controls={filteredSubtopics.length > 0 ? `${topicId}-subtopics` : undefined}
+                                  aria-label={`Topic: ${topic.title}`}
+                                  aria-level="2"
                                 >
-                                  <svg
-                                    className={`w-4 h-4 transition-transform ${topicExpanded ? 'rotate-90' : ''}`}
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M9 5l7 7-7 7"
-                                    />
-                                  </svg>
+                                  {normalizedQuery ? highlightText(topic.title, searchQuery) : topic.title}
                                 </button>
-                              )}
+                                {filteredSubtopics.length > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => toggleTopic(course.title, topic.title, e)}
+                                    onKeyDown={(e) => handleExpandKeyDown(e, course.title, topic.title)}
+                                    className="text-[var(--text-secondary)] hover:text-[var(--accent)] p-1 focus-visible:outline-2 focus-visible:outline-[var(--accent)] focus-visible:outline-offset-2 rounded"
+                                    aria-label={topicExpanded ? `Collapse ${topic.title} subtopics` : `Expand ${topic.title} subtopics`}
+                                    aria-expanded={topicExpanded}
+                                    aria-controls={`${topicId}-subtopics`}
+                                  >
+                                    <svg
+                                      className={`w-4 h-4 transition-transform ${topicExpanded ? 'rotate-90' : ''}`}
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                      aria-hidden="true"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 5l7 7-7 7"
+                                      />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+                              {/* Topic Progress Bar */}
+                              <div className="w-full bg-[var(--surface-muted)]/40 rounded-full h-1 overflow-hidden">
+                                <div
+                                  className="h-full bg-[var(--accent)] transition-all duration-300 ease-out"
+                                  style={{ width: `${topicProgress}%` }}
+                                  role="progressbar"
+                                  aria-valuenow={topicProgress}
+                                  aria-valuemin="0"
+                                  aria-valuemax="100"
+                                  aria-label={`Topic progress: ${topicProgress}%`}
+                                />
+                              </div>
                             </div>
 
                             {/* Nested subtopics under expanded topic */}
@@ -411,27 +481,46 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
                                 aria-label={`${topic.title} subtopics`}
                                 aria-expanded={topicExpanded}
                               >
-                                {filteredSubtopics.map((subtopic, subtopicIndex) => (
-                                  <button
-                                    key={subtopic.title}
-                                    ref={(el) => {
-                                      subtopicRefs.current[subtopicIndex] = el;
-                                    }}
-                                    onClick={() => handleSubtopicClick(subtopic)}
-                                    onKeyDown={(event) => handleSubtopicKeyDown(event, subtopicIndex, subtopic)}
-                                    className={`w-full text-left text-xs p-1.5 rounded transition-colors focus-visible:outline-2 focus-visible:outline-[var(--accent)] focus-visible:outline-offset-2 ${
-                                      selectedSubtopic === subtopic.title
-                                        ? 'text-[var(--accent)] font-semibold bg-[var(--surface-muted)]/40'
-                                        : 'text-[var(--text-secondary)] hover:text-[var(--accent)]'
-                                    }`}
-                                    role="treeitem"
-                                    aria-selected={selectedSubtopic === subtopic.title}
-                                    aria-label={`Subtopic: ${subtopic.title}`}
-                                    aria-level="3"
-                                  >
-                                    {normalizedQuery ? highlightText(subtopic.title, searchQuery) : subtopic.title}
-                                  </button>
-                                ))}
+                                {filteredSubtopics.map((subtopic, subtopicIndex) => {
+                                  const isCompleted = isSubtopicCompleted(topic.title, subtopic.title);
+                                  const isSelected = selectedSubtopic === subtopic.title && selectedTopic === topic.title;
+
+                                  return (
+                                    <div
+                                      key={`${topic.title}-${subtopic.title}`}
+                                      className="flex items-center gap-2 group"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={isCompleted}
+                                        onChange={() => toggleSubtopic(topic.title, subtopic.title)}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="w-4 h-4 rounded-full border-[var(--border-color)] text-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)] cursor-pointer flex-shrink-0"
+                                        aria-label={`Mark ${subtopic.title} as ${isCompleted ? 'incomplete' : 'complete'}`}
+                                      />
+                                      <button
+                                        ref={(el) => {
+                                          subtopicRefs.current[subtopicIndex] = el;
+                                        }}
+                                        onClick={() => handleSubtopicClick(subtopic)}
+                                        onKeyDown={(event) => handleSubtopicKeyDown(event, subtopicIndex, subtopic)}
+                                        className={`flex-1 text-left text-xs p-1.5 rounded transition-colors focus-visible:outline-2 focus-visible:outline-[var(--accent)] focus-visible:outline-offset-2 ${
+                                          isSelected
+                                            ? 'text-[var(--accent)] font-semibold bg-[var(--surface-muted)]/40'
+                                            : isCompleted
+                                            ? 'text-[var(--text-secondary)] opacity-60'
+                                            : 'text-[var(--text-secondary)] hover:text-[var(--accent)]'
+                                        }`}
+                                        role="treeitem"
+                                        aria-selected={isSelected}
+                                        aria-label={`Subtopic: ${subtopic.title}`}
+                                        aria-level="3"
+                                      >
+                                        {normalizedQuery ? highlightText(subtopic.title, searchQuery) : subtopic.title}
+                                      </button>
+                                    </div>
+                                  );
+                                })}
                               </div>
                             )}
                           </div>

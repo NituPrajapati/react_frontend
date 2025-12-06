@@ -137,7 +137,7 @@ function MainContent({ courses, onContentSelect }) {
                 <ReactMarkdown
                   components={{
                     h1: ({ node, ...props }) => (
-                      <h1 className="text-3xl font-bold mb-4 text-[var(--accent)]" {...props} />
+                      <h1 className="text-xl md:text-2xl font-bold mb-3 text-[var(--accent)]" {...props} />
                     ),
                     h2: ({ node, ...props }) => (
                       <h2 className="text-2xl font-bold mt-6 mb-3 text-[var(--accent)]" {...props} />
