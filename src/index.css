@@ -56,9 +56,9 @@ body {
   box-shadow: var(--shadow-soft);
 }
 
-/* Thin scrollbar for sidebar */
+/* Thin scrollbar for sidebar - thinner than main content */
 .sidebar-scroll::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .sidebar-scroll::-webkit-scrollbar-track {
@@ -67,7 +67,7 @@ body {
 
 .sidebar-scroll::-webkit-scrollbar-thumb {
   background-color: var(--border-color);
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
 .sidebar-scroll::-webkit-scrollbar-thumb:hover {
@@ -103,4 +103,103 @@ body {
 .main-content-scroll {
   scrollbar-width: auto;
   scrollbar-color: var(--border-color) var(--surface-page);
+}
+
+/* Skip to content link */
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent);
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  z-index: 1000;
+  border-radius: 0 0 4px 0;
+  font-weight: 600;
+}
+
+.skip-to-content:focus {
+  top: 0;
+  outline: 3px solid var(--accent-contrast);
+  outline-offset: 2px;
+}
+
+/* Focus ring styles for all interactive elements */
+*:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Remove default focus for mouse users, keep for keyboard */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1024px) {
+  .sidebar-scroll {
+    scrollbar-width: thin;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  .skip-to-content {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  .skip-to-content {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+/* Screen reader only class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Ensure proper color contrast for focus states */
+[data-theme='dark'] *:focus-visible {
+  outline-color: var(--accent);
+  outline-offset: 2px;
+}
+
+/* Search highlight styles */
+mark {
+  background-color: #fef08a;
+  color: inherit;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+}
+
+[data-theme='dark'] mark {
+  background-color: #7883a933;
+  color: #08A696;
 }
