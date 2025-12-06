@@ -328,7 +328,7 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
   return (
     <aside
       id="course-sidebar"
-      className={`fixed md:static inset-y-0 left-0 w-80 bg-[var(--surface-elevated)] text-[var(--text-primary)] h-full border-b lg:border-b-0 md:border-r border-[var(--border-color)] flex flex-col overflow-y:scroll max-w-full min-h-0 z-50 md:z-auto transition-transform duration-300 ease-in-out ${
+      className={`fixed md:static inset-y-0 left-0 w-80 bg-[var(--surface-elevated)] text-[var(--text-primary)] h-screen lg:h-screen border-b lg:border-b-0 md:border-r border-[var(--border-color)] flex flex-col overflow-hidden max-w-full min-h-0 z-50 md:z-auto transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       }`}
       aria-label="Course navigation"
@@ -372,6 +372,8 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
                       <div className="font-medium">
                         {normalizedQuery ? highlightText(course.title, searchQuery) : course.title}
                       </div>
+                      {/*line for print percentage of course completion*/}
+                      <span className="text-xs text-[var(--text-secondary)]">{courseProgress}%</span>
                       {course.subtitle && (
                         <div className="text-xs text-[var(--text-secondary)] mt-1">
                           {normalizedQuery ? highlightText(course.subtitle, searchQuery) : course.subtitle}
@@ -430,6 +432,7 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
                                   aria-level="2"
                                 >
                                   {normalizedQuery ? highlightText(topic.title, searchQuery) : topic.title}
+                                  <span className="text-xs text-[var(--text-secondary)]">{topicProgress}%</span>
                                 </button>
                                 {filteredSubtopics.length > 0 && (
                                   <button

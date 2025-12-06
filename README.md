@@ -33,7 +33,7 @@ Course Explorer is a comprehensive learning management interface that allows use
 - LocalStorage persistence - progress saved automatically
 - Visual feedback: completed items shown in grey
 
-### 4. **Accessibility (WCAG 2.1 Compliant)**
+### 4. **Accessibility**
 - Skip-to-content link
 - Proper ARIA roles and attributes
 - Keyboard navigation throughout
@@ -183,43 +183,6 @@ frontend/
   - Side-by-side layout
   - Full navigation tree
 
-## 🎨 Theme System
-
-The application supports light and dark themes:
-- Toggle via the theme button in the navigation bar
-- Theme preference is maintained during the session
-- Smooth color transitions
-
-## 🔧 Customization
-
-### Adding New Courses
-
-Edit `src/data/courses.json` to add new courses, topics, or subtopics. The structure should follow:
-
-```json
-{
-  "courses": [
-    {
-      "title": "Course Title",
-      "subtitle": "Course Subtitle",
-      "description": "Course description",
-      "topics": [
-        {
-          "title": "Topic Title",
-          "description": "Topic description",
-          "subtopics": [
-            {
-              "title": "Subtopic Title",
-              "content": "Markdown content here"
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
-```
-
 ### Styling
 
 - Global styles: `src/index.css`
@@ -242,27 +205,6 @@ Edit `src/data/courses.json` to add new courses, topics, or subtopics. The struc
 
 ## 📝 Development Notes
 
-- The application uses React Context for state management
 - Progress is stored in browser localStorage with key `courseProgress`
-- All calculations are dynamic - no hardcoded values
-- The app is fully accessible and keyboard navigable
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📄 License
-
-This project is part of a React assignment.
-
-## 👤 Author
-
-Developed as part of a React course assignment.
-
----
 
 **Happy Learning! 🎓**

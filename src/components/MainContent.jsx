@@ -116,7 +116,7 @@ function MainContent({ courses, onContentSelect }) {
                       aria-current={isLast ? 'page' : undefined}
                       aria-label={isLast ? `Current page: ${crumb.label}` : `Navigate to ${crumb.label}`}
                     >
-                      {crumb.label}
+                      {crumb.label}  
                     </button>
                   </li>
                 );
