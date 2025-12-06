@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { SelectedProvider } from './contexts/SelectedContext';
 import { ProgressProvider } from './contexts/ProgressContext';
@@ -61,6 +61,7 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const sidebarRef = useRef(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -109,6 +110,7 @@ function HomePage() {
         />
       )}
       <Sidebar 
+        ref={sidebarRef}
         courses={courses} 
         searchQuery={searchQuery} 
         isOpen={sidebarOpen}
@@ -140,7 +142,11 @@ function HomePage() {
             </svg>
           </button>
           <div className="flex-1">
-            <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+            <SearchBar 
+              searchQuery={searchQuery} 
+              setSearchQuery={setSearchQuery}
+              sidebarRef={sidebarRef}
+            />
           </div>
         </div>
         <MainContent courses={courses} onContentSelect={() => setSidebarOpen(false)} />

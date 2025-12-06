@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { debounce } from '../utils/searchHelpers';
 
-function SearchBar({ searchQuery, setSearchQuery }) {
+function SearchBar({ searchQuery, setSearchQuery, sidebarRef }) {
   const searchId = 'course-search-input';
   const resultsId = 'search-results-announcement';
   const [localQuery, setLocalQuery] = useState(searchQuery);
@@ -41,6 +41,18 @@ function SearchBar({ searchQuery, setSearchQuery }) {
       setLocalQuery('');
       setSearchQuery('');
       e.target.blur();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      // Cancel any pending debounced calls
+      if (debouncedSearchRef.current) {
+        debouncedSearchRef.current.cancel?.();
+      }
+      // Trigger immediate search (don't wait for debounce)
+      setSearchQuery(localQuery);
+      // Navigate to first match
+      if (sidebarRef?.current?.navigateToFirstMatch) {
+        sidebarRef.current.navigateToFirstMatch();
+      }
     }
   };
 

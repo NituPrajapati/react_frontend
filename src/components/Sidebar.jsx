@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 import { useSelected } from '../contexts/SelectedContext';
 import { useProgress } from '../contexts/ProgressContext';
 import { highlightText, hasMatch, topicHasMatch, subtopicHasMatch } from '../utils/searchHelpers';
@@ -8,7 +8,7 @@ const highlightClasses =
 const baseButtonClasses =
   'w-full text-left p-3 rounded-lg transition-all duration-200 border border-transparent';
 
-function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
+const Sidebar = forwardRef(function Sidebar({ courses, searchQuery, isOpen = false, onClose }, ref) {
   const {
     selectedCourse,
     selectedTopic,
@@ -31,7 +31,8 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
   const courseRefs = useRef([]);
   const topicRefs = useRef([]);
   const subtopicRefs = useRef([]);
-
+  const firstMatchRef = useRef(null);
+  const firstMatchInfo = useRef(null); // { courseTitle, topicTitle, type: 'course' | 'topic' | 'subtopic' }
   // Detect mobile screen size
   useEffect(() => {
     const checkMobile = () => {
@@ -46,6 +47,8 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
   courseRefs.current = [];
   topicRefs.current = [];
   subtopicRefs.current = [];
+  firstMatchRef.current = null;
+  firstMatchInfo.current = null;
 
   const normalizedQuery = searchQuery?.trim().toLowerCase() || '';
 
@@ -325,6 +328,61 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
     return selectedTopic === topicTitle;
   };
 
+  // Navigate to first match - optimized: no searching, just use the ref
+  const navigateToFirstMatch = () => {
+    if (!firstMatchRef.current || !firstMatchInfo.current) return;
+
+    const { courseTitle, topicTitle, type } = firstMatchInfo.current;
+
+    // Expand course if needed
+    if (courseTitle && !isCourseExpanded(courseTitle)) {
+      setExpandedCourses((prev) => ({ ...prev, [courseTitle]: true }));
+    }
+
+    // Expand topic if needed (for topic or subtopic matches)
+    if (topicTitle && courseTitle && !isTopicExpanded(courseTitle, topicTitle)) {
+      setExpandedTopics((prev) => ({
+        ...prev,
+        [courseTitle]: {
+          ...prev[courseTitle],
+          [topicTitle]: true,
+        },
+      }));
+    }
+
+    // Select the appropriate item
+    if (type === 'subtopic' && topicTitle) {
+      selectCourse(courseTitle);
+      selectTopic(topicTitle);
+      selectSubtopic(firstMatchInfo.current.subtopicTitle);
+    } else if (type === 'topic') {
+      selectCourse(courseTitle);
+      selectTopic(topicTitle);
+      selectSubtopic(null);
+    } else if (type === 'course') {
+      selectCourse(courseTitle);
+      selectTopic(null);
+      selectSubtopic(null);
+    }
+
+    // Scroll and focus after a brief delay to allow expansion
+    setTimeout(() => {
+      if (firstMatchRef.current) {
+        firstMatchRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest',
+        });
+        firstMatchRef.current.focus();
+      }
+    }, 100);
+  };
+
+  // Expose navigateToFirstMatch via ref
+  useImperativeHandle(ref, () => ({
+    navigateToFirstMatch,
+  }));
+
   return (
     <aside
       id="course-sidebar"
@@ -347,6 +405,11 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
               const normalizedId = course.title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
               const filteredTopics = getFilteredTopics(course.topics);
               const courseProgress = getCourseProgress(course);
+              
+              // Check if this course is the first match (only if searching and no match found yet)
+              const isFirstMatchCourse = normalizedQuery && 
+                !firstMatchRef.current && 
+                course.title?.toLowerCase().includes(normalizedQuery);
 
               return (
                 <div key={course.title} className="space-y-2">
@@ -354,6 +417,14 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
                     <button
                       ref={(el) => {
                         courseRefs.current[courseIndex] = el;
+                        // Set as first match if it matches and no match found yet
+                        if (isFirstMatchCourse && !firstMatchRef.current) {
+                          firstMatchRef.current = el;
+                          firstMatchInfo.current = {
+                            courseTitle: course.title,
+                            type: 'course',
+                          };
+                        }
                       }}
                       onClick={() => handleCourseSelect(course)}
                       onKeyDown={(event) => handleCourseKeyDown(event, courseIndex, course)}
@@ -408,6 +479,12 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
                         const topicId = `${normalizedId}-topic-${topic.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
                         const filteredSubtopics = getFilteredSubtopics(topic.subtopics);
                         const topicProgress = getSingleTopicProgress(topic);
+                        
+                        // Check if this topic is the first match (only if searching, no match found yet, and course doesn't match)
+                        const isFirstMatchTopic = normalizedQuery && 
+                          !firstMatchRef.current && 
+                          !course.title?.toLowerCase().includes(normalizedQuery) &&
+                          topic.title?.toLowerCase().includes(normalizedQuery);
 
                         return (
                           <div key={topic.title} className="space-y-2">
@@ -416,6 +493,15 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
                                 <button
                                   ref={(el) => {
                                     topicRefs.current[topicIndex] = el;
+                                    // Set as first match if it matches and no match found yet
+                                    if (isFirstMatchTopic && !firstMatchRef.current) {
+                                      firstMatchRef.current = el;
+                                      firstMatchInfo.current = {
+                                        courseTitle: course.title,
+                                        topicTitle: topic.title,
+                                        type: 'topic',
+                                      };
+                                    }
                                   }}
                                   onClick={() => handleTopicClick(topic)}
                                   onKeyDown={(event) => handleTopicKeyDown(event, topicIndex, topic)}
@@ -487,6 +573,13 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
                                 {filteredSubtopics.map((subtopic, subtopicIndex) => {
                                   const isCompleted = isSubtopicCompleted(topic.title, subtopic.title);
                                   const isSelected = selectedSubtopic === subtopic.title && selectedTopic === topic.title;
+                                  
+                                  // Check if this subtopic is the first match (only if searching, no match found yet, and parent doesn't match)
+                                  const isFirstMatchSubtopic = normalizedQuery && 
+                                    !firstMatchRef.current && 
+                                    !course.title?.toLowerCase().includes(normalizedQuery) &&
+                                    !topic.title?.toLowerCase().includes(normalizedQuery) &&
+                                    subtopic.title?.toLowerCase().includes(normalizedQuery);
 
                                   return (
                                     <div
@@ -504,6 +597,16 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
                                       <button
                                         ref={(el) => {
                                           subtopicRefs.current[subtopicIndex] = el;
+                                          // Set as first match if it matches and no match found yet
+                                          if (isFirstMatchSubtopic && !firstMatchRef.current) {
+                                            firstMatchRef.current = el;
+                                            firstMatchInfo.current = {
+                                              courseTitle: course.title,
+                                              topicTitle: topic.title,
+                                              subtopicTitle: subtopic.title,
+                                              type: 'subtopic',
+                                            };
+                                          }
                                         }}
                                         onClick={() => handleSubtopicClick(subtopic)}
                                         onKeyDown={(event) => handleSubtopicKeyDown(event, subtopicIndex, subtopic)}
@@ -539,6 +642,6 @@ function Sidebar({ courses, searchQuery, isOpen = false, onClose }) {
       </div>
     </aside>
   );
-}
+});
 
 export default Sidebar;
